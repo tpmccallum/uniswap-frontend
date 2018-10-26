@@ -1,7 +1,23 @@
 {
-  "main.css": "static/css/main.af6f02eb.css",
-  "main.css.map": "static/css/main.af6f02eb.css.map",
-  "main.js": "static/js/main.6ee37687.js",
-  "main.js.map": "static/js/main.6ee37687.js.map",
-  "static/media/🦄.png": "static/media/🦄.de7a6bdf.png"
+  "main.css": "./static/css/main.42557609.chunk.css",
+  "main.js": "./static/js/main.5f4be515.chunk.js",
+  "main.js.map": "./static/js/main.5f4be515.chunk.js.map",
+  "static/js/1.689e582a.chunk.js": "./static/js/1.689e582a.chunk.js",
+  "static/js/1.689e582a.chunk.js.map": "./static/js/1.689e582a.chunk.js.map",
+  "runtime~main.js": "./static/js/runtime~main.4a686d48.js",
+  "runtime~main.js.map": "./static/js/runtime~main.4a686d48.js.map",
+  "static/media/arrow-down-blue.svg": "./static/media/arrow-down-blue.cd061363.svg",
+  "static/media/trust-wallet-logo.svg": "./static/media/trust-wallet-logo.0be980e8.svg",
+  "static/media/brave-logo.png": "./static/media/brave-logo.cb563c38.png",
+  "static/media/metamask-logo.png": "./static/media/metamask-logo.023762b6.png",
+  "static/media/ethereum-logo.png": "./static/media/ethereum-logo.040d3851.png",
+  "static/media/generic-token-logo.png": "./static/media/generic-token-logo.c73674bb.png",
+  "static/media/magnifying-glass.svg": "./static/media/magnifying-glass.67440097.svg",
+  "static/media/qr-code.svg": "./static/media/qr-code.c89be69c.svg",
+  "static/media/currency-panel.scss": "./static/media/dropdown-blue.b20914ec.svg",
+  "static/media/pending.svg": "./static/media/pending.0c1b02af.svg",
+  "static/css/main.42557609.chunk.css.map": "./static/css/main.42557609.chunk.css.map",
+  "index.html": "./index.html",
+  "precache-manifest.d3dca0907d3d6637a75f5c75d0f7fb7f.js": "./precache-manifest.d3dca0907d3d6637a75f5c75d0f7fb7f.js",
+  "service-worker.js": "./service-worker.js"
 }

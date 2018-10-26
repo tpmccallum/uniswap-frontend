@@ -4,7 +4,7 @@ self.__precacheManifest = [
     "url": "./static/media/metamask-logo.023762b6.png"
   },
   {
-    "revision": "5f4be515aa6c0a3b7ec4",
+    "revision": "e8e95ad3af6c1505b2a4",
     "url": "./static/css/main.42557609.chunk.css"
   },
   {
@@ -32,8 +32,8 @@ self.__precacheManifest = [
     "url": "./static/media/brave-logo.cb563c38.png"
   },
   {
-    "revision": "5f4be515aa6c0a3b7ec4",
-    "url": "./static/js/main.5f4be515.chunk.js"
+    "revision": "e8e95ad3af6c1505b2a4",
+    "url": "./static/js/main.e8e95ad3.chunk.js"
   },
   {
     "revision": "040d3851a083aab7f00a01aa0ddd023b",
@@ -60,7 +60,7 @@ self.__precacheManifest = [
     "url": "./static/media/dropdown-blue.b20914ec.svg"
   },
   {
-    "revision": "a57b6a6ec9e849d567c12f0c4f75f890",
+    "revision": "ba4f83ae174af08b71b36547f8a0aec0",
     "url": "./index.html"
   }
 ];

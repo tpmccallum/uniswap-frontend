@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { drizzleConnect } from 'drizzle-react';
+import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import classnames from "classnames";
 import { CSSTransitionGroup } from "react-transition-group";
@@ -139,7 +139,7 @@ class AddLiquidity extends Component {
     const block = await promisify(web3, 'getBlock', blockNumber);
     const deadline = block.timestamp + 300;
     const MAX_LIQUIDITY_SLIPPAGE = 0.025;
-    const minLiquidity = liquidityMinted.multipliedBy(1 - MAX_LIQUIDITY_SLIPPAGE);
+    const minLiquidity = this.isNewExchange() ? BN(0) : liquidityMinted.multipliedBy(1 - MAX_LIQUIDITY_SLIPPAGE);
     const maxTokens = tokenAmount.multipliedBy(1 + MAX_LIQUIDITY_SLIPPAGE);
 
     try {
@@ -500,7 +500,7 @@ class AddLiquidity extends Component {
             )
             : null
         }
-        <ModeSelector />
+        <ModeSelector title="Add Liquidity" />
         <CurrencyInputPanel
           title="Deposit"
           extraText={this.getBalance(inputCurrency)}
@@ -551,8 +551,7 @@ class AddLiquidity extends Component {
   }
 }
 
-export default drizzleConnect(
-  AddLiquidity,
+export default connect(
   state => ({
     isConnected: Boolean(state.web3connect.account),
     account: state.web3connect.account,
@@ -563,7 +562,7 @@ export default drizzleConnect(
   dispatch => ({
     selectors: () => dispatch(selectors()),
   })
-)
+)(AddLiquidity);
 
 function b(text) {
   return <span className="swap__highlight-text">{text}</span>

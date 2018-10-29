@@ -6,7 +6,12 @@
     position: relative;
 
     @media only screen and (min-device-width : 768px) {
+<<<<<<< HEAD
       margin-top: 4rem;
+=======
+      margin: auto;
+      width: 560px;
+>>>>>>> master
     }
 
     & > div {
@@ -25,6 +30,10 @@
   @extend %col-nowrap;
 
   @media only screen and (min-device-width : 768px) {
+<<<<<<< HEAD
     max-width: 560px;
+=======
+    //max-width: 560px;
+>>>>>>> master
   }
 }

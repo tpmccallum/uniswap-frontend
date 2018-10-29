@@ -1,14 +1,39 @@
 import React, { Component } from 'react';
-import { drizzleConnect } from 'drizzle-react';
+import { withRouter } from 'react-router-dom';
 import OversizedPanel from "../../components/OversizedPanel";
 import Dropdown from "../../assets/images/dropdown.svg";
 import Modal from "../../components/Modal";
 import {CSSTransitionGroup} from "react-transition-group";
 
+const ADD = 'Add Liquidity';
+const REMOVE = 'Remove Liquidity';
+const CREATE = 'Create Exchange';
+
 class ModeSelector extends Component {
   state = {
     isShowingModal: false,
+    selected: ADD,
   };
+
+  changeView(view) {
+    const { history } = this.props;
+
+    this.setState({
+      isShowingModal: false,
+      selected: view,
+    });
+
+    switch (view) {
+      case ADD:
+        return history.push('/add-liquidity');
+      case REMOVE:
+        return history.push('/remove-liquidity');
+      case CREATE:
+        return history.push('/create-exchange');
+      default:
+        return;
+    }
+  }
 
   renderModal() {
     if (!this.state.isShowingModal) {
@@ -28,15 +53,21 @@ class ModeSelector extends Component {
           <div className="pool-modal">
             <div
               className="pool-modal__item"
-              onClick={() => this.setState({ isShowingModal: false })}
+              onClick={() => this.changeView(ADD)}
             >
-              Add Liquidity
+              {ADD}
             </div>
             <div
               className="pool-modal__item"
-              onClick={() => this.setState({ isShowingModal: false })}
+              onClick={() => this.changeView(REMOVE)}
             >
-              Remove Liquidity
+              {REMOVE}
+            </div>
+            <div
+              className="pool-modal__item"
+              onClick={() => this.changeView(CREATE)}
+            >
+              {CREATE}
             </div>
           </div>
         </CSSTransitionGroup>
@@ -51,7 +82,9 @@ class ModeSelector extends Component {
           className="pool__liquidity-container"
           onClick={() => this.setState({ isShowingModal: true })}
         >
-          <span className="pool__liquidity-label">Add Liquidity</span>
+          <span className="pool__liquidity-label">
+            {this.props.title}
+          </span>
           <img src={Dropdown} />
         </div>
         {this.renderModal()}
@@ -60,4 +93,4 @@ class ModeSelector extends Component {
   }
 }
 
-export default drizzleConnect(ModeSelector);
+export default withRouter(ModeSelector);

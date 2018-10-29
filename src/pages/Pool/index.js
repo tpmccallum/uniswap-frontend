@@ -1,29 +1,25 @@
 import React, { Component } from 'react';
 import Header from '../../components/Header';
 import AddLiquidity from './AddLiquidity';
+import CreateExchange from './CreateExchange';
+import RemoveLiquidity from './RemoveLiquidity';
+import { Switch, Route } from 'react-router-dom';
 import "./pool.scss";
+import MediaQuery from "react-responsive";
 
-const ADD_LIQUIDITY = 'Add Liquidity';
-const REMOVE_LIQUIDITY = 'Remove Liquidity';
 
 class Pool extends Component {
-  state = {
-    selectedMode: ADD_LIQUIDITY,
-  };
-
-  renderContent() {
-    switch (this.state.selectedMode) {
-      case ADD_LIQUIDITY:
-      default:
-        return <AddLiquidity />
-    }
-  }
-
   render() {
     return (
       <div className="pool">
-        <Header />
-        { this.renderContent() }
+        <MediaQuery query="(max-device-width: 768px)">
+          <Header />
+        </MediaQuery>
+        <Switch>
+          <Route exact path="/add-liquidity" component={AddLiquidity} />
+          <Route exact path="/remove-liquidity" component={RemoveLiquidity} />
+          <Route exact path="/create-exchange" component={CreateExchange} />
+        </Switch>
       </div>
     );
   }

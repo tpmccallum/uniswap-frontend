@@ -1,10 +1,11 @@
 import React, { Component } from 'react';
-import { drizzleConnect } from 'drizzle-react';
+import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import classnames from 'classnames';
 import {BigNumber as BN} from "bignumber.js";
 import { selectors } from '../../ducks/web3connect';
 import { CSSTransitionGroup } from "react-transition-group";
+import MediaQuery from 'react-responsive';
 import Header from '../../components/Header';
 import NavigationTabs from '../../components/NavigationTabs';
 import Modal from '../../components/Modal';
@@ -25,7 +26,6 @@ class Swap extends Component {
   static propTypes = {
     account: PropTypes.string,
     isConnected: PropTypes.bool.isRequired,
-    isValid: PropTypes.bool.isRequired,
     selectors: PropTypes.func.isRequired,
     web3: PropTypes.object.isRequired,
   };
@@ -450,13 +450,6 @@ class Swap extends Component {
             return;
           }
 
-          console.log(
-            BN(outputValue).multipliedBy(10 ** outputDecimals).toFixed(0),
-            BN(inputValue).multipliedBy(10 ** inputDecimals).multipliedBy(1 + TOKEN_ALLOWED_SLIPPAGE).toFixed(0),
-            inputAmountB.multipliedBy(1.2).toFixed(0),
-            deadline,
-            outputCurrency,
-          )
           new web3.eth.Contract(EXCHANGE_ABI, fromToken[inputCurrency])
             .methods
             .tokenToTokenSwapOutput(
@@ -689,7 +682,9 @@ class Swap extends Component {
 
     return (
       <div className="swap">
-        <Header />
+        <MediaQuery query="(max-device-width: 767px)">
+          <Header />
+        </MediaQuery>
         <div
           className={classnames('swap__content', {
             'swap--inactive': !this.props.isConnected,
@@ -753,8 +748,7 @@ class Swap extends Component {
   }
 }
 
-export default drizzleConnect(
-  Swap,
+export default connect(
   state => ({
     balances: state.web3connect.balances,
     isConnected: !!state.web3connect.account,
@@ -765,7 +759,7 @@ export default drizzleConnect(
   dispatch => ({
     selectors: () => dispatch(selectors()),
   }),
-);
+)(Swap);
 
 const b = text => <span className="swap__highlight-text">{text}</span>;
 

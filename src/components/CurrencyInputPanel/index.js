@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { drizzleConnect } from 'drizzle-react'
+import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import { CSSTransitionGroup } from "react-transition-group";
 import classnames from 'classnames';
@@ -56,6 +56,7 @@ class CurrencyInputPanel extends Component {
     addExchange: PropTypes.func.isRequired,
     filteredTokens: PropTypes.arrayOf(PropTypes.string),
     disableUnlock: PropTypes.bool,
+    renderInput: PropTypes.func,
   };
 
   static defaultProps = {
@@ -64,10 +65,6 @@ class CurrencyInputPanel extends Component {
     onCurrencySelected() {},
     onValueChange() {},
     selectedTokenAddress: '',
-  };
-
-  static contextTypes = {
-    drizzle: PropTypes.object,
   };
 
   state = {
@@ -253,16 +250,76 @@ class CurrencyInputPanel extends Component {
     );
   }
 
+  renderInput() {
+    const {
+      errorMessage,
+      value,
+      onValueChange,
+      selectedTokenAddress,
+      disableTokenSelect,
+      renderInput,
+    } = this.props;
+
+    if (typeof renderInput === 'function') {
+      return renderInput();
+    }
+
+    return (
+      <div className="currency-input-panel__input-row">
+        <input
+          type="number"
+          min="0"
+          className={classnames('currency-input-panel__input',{
+            'currency-input-panel__input--error': errorMessage,
+          })}
+          placeholder="0.0"
+          onChange={e => onValueChange(e.target.value)}
+          onKeyPress={e => {
+            const charCode = e.which ? e.which : e.keyCode;
+
+            // Prevent 'minus' character
+            if (charCode === 45) {
+              e.preventDefault();
+              e.stopPropagation();
+            }
+          }}
+          value={value}
+        />
+        { this.renderUnlockButton() }
+        <button
+          className={classnames("currency-input-panel__currency-select", {
+            'currency-input-panel__currency-select--selected': selectedTokenAddress,
+            'currency-input-panel__currency-select--disabled': disableTokenSelect,
+          })}
+          onClick={() => {
+            if (!disableTokenSelect) {
+              this.setState({ isShowingModal: true });
+            }
+          }}
+        >
+          {
+            selectedTokenAddress
+              ? (
+                <TokenLogo
+                  className="currency-input-panel__selected-token-logo"
+                  address={selectedTokenAddress}
+                />
+              )
+              : null
+          }
+          { TOKEN_ADDRESS_TO_LABEL[selectedTokenAddress] || 'Select a token' }
+          <span className="currency-input-panel__dropdown-icon" />
+        </button>
+      </div>
+    );
+  }
+
   render() {
     const {
       title,
       description,
       extraText,
       errorMessage,
-      value,
-      onValueChange,
-      selectedTokenAddress,
-      disableTokenSelect,
     } = this.props;
 
     return (
@@ -281,52 +338,7 @@ class CurrencyInputPanel extends Component {
               {extraText}
             </span>
           </div>
-          <div className="currency-input-panel__input-row">
-            <input
-              type="number"
-              min="0"
-              className={classnames('currency-input-panel__input',{
-                'currency-input-panel__input--error': errorMessage,
-              })}
-              placeholder="0.0"
-              onChange={e => onValueChange(e.target.value)}
-              onKeyPress={e => {
-                const charCode = e.which ? e.which : e.keyCode;
-
-                // Prevent 'minus' character
-                if (charCode === 45) {
-                  e.preventDefault();
-                  e.stopPropagation();
-                }
-              }}
-              value={value}
-            />
-            { this.renderUnlockButton() }
-            <button
-              className={classnames("currency-input-panel__currency-select", {
-                'currency-input-panel__currency-select--selected': selectedTokenAddress,
-                'currency-input-panel__currency-select--disabled': disableTokenSelect,
-              })}
-              onClick={() => {
-                if (!disableTokenSelect) {
-                  this.setState({ isShowingModal: true });
-                }
-              }}
-            >
-              {
-                selectedTokenAddress
-                  ? (
-                    <TokenLogo
-                      className="currency-input-panel__selected-token-logo"
-                      address={selectedTokenAddress}
-                    />
-                  )
-                  : null
-              }
-              { TOKEN_ADDRESS_TO_LABEL[selectedTokenAddress] || 'Select a token' }
-              <span className="currency-input-panel__dropdown-icon" />
-            </button>
-          </div>
+          {this.renderInput()}
         </div>
         {this.renderModal()}
       </div>
@@ -334,8 +346,7 @@ class CurrencyInputPanel extends Component {
   }
 }
 
-export default drizzleConnect(
-  CurrencyInputPanel,
+export default connect(
   state => ({
     factoryAddress: state.addresses.factoryAddress,
     exchangeAddresses: state.addresses.exchangeAddresses,
@@ -349,4 +360,4 @@ export default drizzleConnect(
     selectors: () => dispatch(selectors()),
     addExchange: opts => dispatch(addExchange(opts)),
   }),
-);
+)(CurrencyInputPanel);

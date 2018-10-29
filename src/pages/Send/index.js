@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { drizzleConnect } from 'drizzle-react';
+import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import classnames from 'classnames';
 import {BigNumber as BN} from "bignumber.js";
@@ -18,6 +18,7 @@ import EXCHANGE_ABI from '../../abi/exchange';
 
 import "./send.scss";
 import promisify from "../../helpers/web3-promisfy";
+import MediaQuery from "react-responsive";
 
 const INPUT = 0;
 const OUTPUT = 1;
@@ -458,13 +459,6 @@ class Send extends Component {
             return;
           }
 
-          console.log(
-            BN(outputValue).multipliedBy(10 ** outputDecimals).toFixed(0),
-            BN(inputValue).multipliedBy(10 ** inputDecimals).multipliedBy(1 + TOKEN_ALLOWED_SLIPPAGE).toFixed(0),
-            inputAmountB.multipliedBy(1.2).toFixed(0),
-            deadline,
-            outputCurrency,
-          )
           new web3.eth.Contract(EXCHANGE_ABI, fromToken[inputCurrency])
             .methods
             .tokenToTokenTransferOutput(
@@ -672,7 +666,7 @@ class Send extends Component {
         </OversizedPanel>
       );
     }
-
+    console.log(outputLabel)
     return (
       <OversizedPanel hideBottom>
         <div className="swap__exchange-rate-wrapper">
@@ -704,7 +698,9 @@ class Send extends Component {
 
     return (
       <div className="send">
-        <Header />
+        <MediaQuery query="(max-device-width: 767px)">
+          <Header />
+        </MediaQuery>
         <div
           className={classnames('swap__content', {
             'swap--inactive': !this.props.isConnected,
@@ -777,8 +773,7 @@ class Send extends Component {
   }
 }
 
-export default drizzleConnect(
-  Send,
+export default connect(
   state => ({
     balances: state.web3connect.balances,
     isConnected: !!state.web3connect.account,
@@ -789,7 +784,7 @@ export default drizzleConnect(
   dispatch => ({
     selectors: () => dispatch(selectors()),
   }),
-);
+)(Send);
 
 const b = text => <span className="swap__highlight-text">{text}</span>;
 

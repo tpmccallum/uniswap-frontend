@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-// import { connect } from 'react-redux';
-import { drizzleConnect } from 'drizzle-react';
+import { connect } from 'react-redux';
 import {BigNumber as BN} from 'bignumber.js';
 import Web3 from 'web3';
 import ERC20_ABI from "../abi/erc20";
@@ -45,6 +44,7 @@ const initialState = {
 const TOKEN_LABEL_FALLBACK = {
   '0x89d24A6b4CcB1B6fAA2625fE562bDD9a23260359': 'DAI',
   '0x9f8F72aA9304c8B593d555F12eF6589cC3A579A2': 'MKR',
+  '0x9B913956036a3462330B0642B20D3879ce68b450': 'BAT + ETH'
 };
 
 // selectors
@@ -108,7 +108,7 @@ const Balance = (value, label = '', decimals = 18) => ({
 export const initialize = () => (dispatch, getState) => {
   const { web3connect } = getState();
 
-  return new Promise(async resolve => {
+  return new Promise(async (resolve, reject) => {
     if (web3connect.web3) {
       resolve(web3connect.web3);
       return;
@@ -126,6 +126,8 @@ export const initialize = () => (dispatch, getState) => {
         return;
       } catch (error) {
         console.error('User denied access.');
+        dispatch({ type: INITIALIZE });
+        reject();
         return;
       }
     }
@@ -138,6 +140,9 @@ export const initialize = () => (dispatch, getState) => {
       });
       resolve(web3);
     }
+
+    dispatch({ type: INITIALIZE });
+    reject();
   })
 };
 
@@ -242,6 +247,7 @@ export const sync = () => async (dispatch, getState) => {
       }
 
       const contract = contracts[tokenAddress] || new web3.eth.Contract(ERC20_ABI, tokenAddress);
+      const contractBytes32 = contracts[tokenAddress] || new web3.eth.Contract(ERC20_WITH_BYTES_ABI, tokenAddress);
 
       if (!contracts[tokenAddress]) {
         dispatch({
@@ -258,7 +264,17 @@ export const sync = () => async (dispatch, getState) => {
         const tokenBalance = getBalance(address, tokenAddress);
         const balance = await contract.methods.balanceOf(address).call();
         const decimals = tokenBalance.decimals || await contract.methods.decimals().call();
-        const symbol = TOKEN_LABEL_FALLBACK[tokenAddress] || tokenBalance.label || await contract.methods.symbol().call();
+        let symbol = tokenBalance.symbol;
+
+        try {
+          symbol = symbol || await contract.methods.symbol().call().catch();
+        } catch (e) {
+          try {
+            symbol = symbol || web3.utils.hexToString(await contractBytes32.methods.symbol().call().catch());
+          } catch (err) {
+
+          }
+        }
 
         if (tokenBalance.value.isEqualTo(BN(balance)) && tokenBalance.label && tokenBalance.decimals) {
           return;
@@ -442,8 +458,7 @@ export class _Web3Connect extends Component {
   }
 }
 
-export const Web3Connect = drizzleConnect(
-  _Web3Connect,
+export const Web3Connect = connect(
   ({ web3connect }) => ({
     web3: web3connect.web3,
   }),
@@ -451,4 +466,4 @@ export const Web3Connect = drizzleConnect(
     initialize: () => dispatch(initialize()),
     startWatching: () => dispatch(startWatching()),
   }),
-);
+)(_Web3Connect);

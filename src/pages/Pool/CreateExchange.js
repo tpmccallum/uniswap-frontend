@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
+import { withRouter } from 'react-router-dom';
 import {selectors} from "../../ducks/web3connect";
 import classnames from "classnames";
 import NavigationTabs from "../../components/NavigationTabs";
@@ -9,6 +10,7 @@ import AddressInputPanel from "../../components/AddressInputPanel";
 import OversizedPanel from "../../components/OversizedPanel";
 import FACTORY_ABI from "../../abi/factory";
 import {addExchange} from "../../ducks/addresses";
+import ReactGA from "react-ga";
 
 class CreateExchange extends Component {
   static propTypes = {
@@ -23,11 +25,16 @@ class CreateExchange extends Component {
     }).isRequired,
   };
 
-  state = {
-    tokenAddress: '',
-    label: '',
-    decimals: 0,
-  };
+  constructor(props) {
+    super(props);
+    const { match: { params: { tokenAddress } } } = this.props;
+
+    this.state = {
+      tokenAddress,
+      label: '',
+      decimals: 0,
+    };
+  }
 
   validate() {
     const { tokenAddress } = this.state;
@@ -118,6 +125,10 @@ class CreateExchange extends Component {
           decimals: 0,
           tokenAddress: '',
         });
+        ReactGA.event({
+          category: 'Pool',
+          action: 'CreateExchange',
+        });
       }
     })
   };
@@ -151,7 +162,7 @@ class CreateExchange extends Component {
     const { isValid, errorMessage } = this.validate();
     let label, decimals;
 
-    if (web3.utils.isAddress(tokenAddress)) {
+    if (web3 && web3.utils && web3.utils.isAddress(tokenAddress)) {
       const { label: _label, decimals: _decimals } = selectors().getBalance(account, tokenAddress);
       label = _label;
       decimals = _decimals;
@@ -205,17 +216,19 @@ class CreateExchange extends Component {
   }
 }
 
-export default connect(
-  state => ({
-    isConnected: Boolean(state.web3connect.account),
-    account: state.web3connect.account,
-    balances: state.web3connect.balances,
-    web3: state.web3connect.web3,
-    exchangeAddresses: state.addresses.exchangeAddresses,
-    factoryAddress: state.addresses.factoryAddress,
-  }),
-  dispatch => ({
-    selectors: () => dispatch(selectors()),
-    addExchange: opts => dispatch(addExchange(opts)),
-  })
-)(CreateExchange);
+export default withRouter(
+  connect(
+    state => ({
+      isConnected: Boolean(state.web3connect.account) && state.web3connect.networkId == (process.env.REACT_APP_NETWORK_ID||1),
+      account: state.web3connect.account,
+      balances: state.web3connect.balances,
+      web3: state.web3connect.web3,
+      exchangeAddresses: state.addresses.exchangeAddresses,
+      factoryAddress: state.addresses.factoryAddress,
+    }),
+    dispatch => ({
+      selectors: () => dispatch(selectors()),
+      addExchange: opts => dispatch(addExchange(opts)),
+    })
+  )(CreateExchange)
+);

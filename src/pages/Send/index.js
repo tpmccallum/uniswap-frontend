@@ -19,6 +19,7 @@ import EXCHANGE_ABI from '../../abi/exchange';
 import "./send.scss";
 import promisify from "../../helpers/web3-promisfy";
 import MediaQuery from "react-responsive";
+import ReactGA from "react-ga";
 
 const INPUT = 0;
 const OUTPUT = 1;
@@ -41,6 +42,10 @@ class Send extends Component {
     recipient: '',
     showSummaryModal: false,
   };
+
+  componentWillMount() {
+    ReactGA.pageview(window.location.pathname + window.location.search);
+  }
 
   shouldComponentUpdate(nextProps, nextState) {
     return true;
@@ -196,8 +201,8 @@ class Send extends Component {
         outputReserve: outputReserveB,
       });
 
-      const exchangeRate = outputAmountB.dividedBy(inputAmountA);
       const outputValue = outputAmountB.dividedBy(BN(10 ** outputDecimalsB)).toFixed(7);
+      const exchangeRate = BN(outputValue).dividedBy(BN(oldInputValue));
 
       const appendState = {};
 
@@ -236,10 +241,10 @@ class Send extends Component {
         outputReserve: outputReserveA,
       });
 
-      const exchangeRate = outputAmountB.dividedBy(inputAmountA);
       const inputValue = inputAmountA.isNegative()
         ? 'N/A'
         : inputAmountA.dividedBy(BN(10 ** inputDecimalsA)).toFixed(7);
+      const exchangeRate = BN(oldOutputValue).dividedBy(BN(inputValue));
 
       const appendState = {};
 
@@ -293,8 +298,8 @@ class Send extends Component {
 
       const inputAmount = BN(oldInputValue).multipliedBy(10 ** inputDecimals);
       const outputAmount = calculateEtherTokenOutput({ inputAmount, inputReserve, outputReserve });
-      const exchangeRate = outputAmount.dividedBy(inputAmount);
       const outputValue = outputAmount.dividedBy(BN(10 ** outputDecimals)).toFixed(7);
+      const exchangeRate = BN(outputValue).dividedBy(BN(oldInputValue));
 
       const appendState = {};
 
@@ -317,10 +322,10 @@ class Send extends Component {
 
       const outputAmount = BN(oldOutputValue).multipliedBy(10 ** outputDecimals);
       const inputAmount = calculateEtherTokenInput({ outputAmount, inputReserve, outputReserve });
-      const exchangeRate = outputAmount.dividedBy(inputAmount);
       const inputValue = inputAmount.isNegative()
         ? 'N/A'
         : inputAmount.dividedBy(BN(10 ** inputDecimals)).toFixed(7);
+      const exchangeRate = BN(oldOutputValue).dividedBy(BN(inputValue));
 
       const appendState = {};
 
@@ -377,6 +382,10 @@ class Send extends Component {
     const deadline =  block.timestamp + 300;
 
     if (lastEditedField === INPUT) {
+      ReactGA.event({
+        category: type,
+        action: 'TransferInput',
+      });
       // send input
       switch(type) {
         case 'ETH_TO_TOKEN':
@@ -427,6 +436,10 @@ class Send extends Component {
 
     if (lastEditedField === OUTPUT) {
       // send output
+      ReactGA.event({
+        category: type,
+        action: 'TransferOutput',
+      });
       switch (type) {
         case 'ETH_TO_TOKEN':
           new web3.eth.Contract(EXCHANGE_ABI, fromToken[outputCurrency])
@@ -556,6 +569,11 @@ class Send extends Component {
       return null;
     }
 
+    ReactGA.event({
+      category: 'TransactionDetail',
+      action: 'Open',
+    });
+
     const ALLOWED_SLIPPAGE = 0.025;
     const TOKEN_ALLOWED_SLIPPAGE = 0.04;
 
@@ -666,7 +684,7 @@ class Send extends Component {
         </OversizedPanel>
       );
     }
-    console.log(outputLabel)
+
     return (
       <OversizedPanel hideBottom>
         <div className="swap__exchange-rate-wrapper">
@@ -693,7 +711,6 @@ class Send extends Component {
 
     const { value: inputBalance, decimals: inputDecimals } = selectors().getBalance(account, inputCurrency);
     const { value: outputBalance, decimals: outputDecimals } = selectors().getBalance(account, outputCurrency);
-
     const { inputError, outputError, isValid } = this.validate();
 
     return (
@@ -776,7 +793,7 @@ class Send extends Component {
 export default connect(
   state => ({
     balances: state.web3connect.balances,
-    isConnected: !!state.web3connect.account,
+    isConnected: !!state.web3connect.account && state.web3connect.networkId == (process.env.REACT_APP_NETWORK_ID||1),
     account: state.web3connect.account,
     web3: state.web3connect.web3,
     exchangeAddresses: state.addresses.exchangeAddresses,

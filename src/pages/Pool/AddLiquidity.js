@@ -16,6 +16,7 @@ import {BigNumber as BN} from 'bignumber.js';
 import EXCHANGE_ABI from '../../abi/exchange';
 import "./pool.scss";
 import promisify from "../../helpers/web3-promisfy";
+import ReactGA from "react-ga";
 
 const INPUT = 0;
 const OUTPUT = 1;
@@ -37,7 +38,17 @@ class AddLiquidity extends Component {
     inputCurrency: 'ETH',
     outputCurrency: '',
     lastEditedField: '',
+    totalSupply: BN(0),
     showSummaryModal: false,
+  };
+
+  reset = () => {
+    this.setState({
+      inputValue: '',
+      outputValue: '',
+      lastEditedField: '',
+      showSummaryModal: false,
+    });
   };
 
   shouldComponentUpdate(nextProps, nextState) {
@@ -61,18 +72,27 @@ class AddLiquidity extends Component {
     this.recalcForm();
   }
 
-  recalcForm = () => {
+  recalcForm = async () => {
     const {
       outputCurrency,
       inputValue,
       outputValue,
       lastEditedField,
+      totalSupply: oldTotalSupply,
     } = this.state;
+    const { exchangeAddresses: { fromToken }, web3 } = this.props;
+    const exchangeAddress = fromToken[outputCurrency];
     const exchangeRate = this.getExchangeRate();
     const append = {};
 
-    if (!outputCurrency || this.isNewExchange()) {
+    if (!outputCurrency || this.isNewExchange() || !web3) {
       return;
+    }
+
+    const exchange = new web3.eth.Contract(EXCHANGE_ABI, exchangeAddress);
+    const totalSupply = await exchange.methods.totalSupply().call();
+    if (!oldTotalSupply.isEqualTo(BN(totalSupply))) {
+      append.totalSupply = BN(totalSupply);
     }
 
     if (lastEditedField === INPUT) {
@@ -90,7 +110,7 @@ class AddLiquidity extends Component {
     }
 
     this.setState(append);
-  }
+  };
 
   getBalance(currency) {
     const { selectors, account } = this.props;
@@ -143,9 +163,17 @@ class AddLiquidity extends Component {
     const maxTokens = tokenAmount.multipliedBy(1 + MAX_LIQUIDITY_SLIPPAGE);
 
     try {
-      await exchange.methods.addLiquidity(minLiquidity.toFixed(0), maxTokens.toFixed(0), deadline).send({
+      exchange.methods.addLiquidity(minLiquidity.toFixed(0), maxTokens.toFixed(0), deadline).send({
         from: account,
         value: ethAmount.toFixed(0)
+      }, (err, data) => {
+        this.reset();
+        if (data) {
+          ReactGA.event({
+            category: 'Pool',
+            action: 'AddLiquidity',
+          });
+        }
       });
     } catch (err) {
       console.error(err);
@@ -280,21 +308,32 @@ class AddLiquidity extends Component {
           <span className="swap__exchange-rate">Current Pool Size</span>
           <span> - </span>
         </div>
+        <div className="pool__exchange-rate-wrapper">
+          <span className="swap__exchange-rate">Your Pool Share</span>
+          <span> - </span>
+        </div>
       </div>
     );
 
-    const { selectors, exchangeAddresses: { fromToken } } = this.props;
+    const { selectors, exchangeAddresses: { fromToken }, account } = this.props;
     const { getBalance } = selectors();
-    const { inputCurrency, outputCurrency, inputValue, outputValue } = this.state;
+    const { inputCurrency, outputCurrency, inputValue, outputValue, totalSupply } = this.state;
     const eth = [inputCurrency, outputCurrency].filter(currency => currency === 'ETH')[0];
     const token = [inputCurrency, outputCurrency].filter(currency => currency !== 'ETH')[0];
+    const exchangeAddress = fromToken[token];
 
-    if (!eth || !token) {
+    if (!eth || !token || !exchangeAddress) {
       return blank;
     }
 
-    const { value: tokenValue, decimals, label } = getBalance(fromToken[token], token);
-    const { value: ethValue } = getBalance(fromToken[token]);
+    const { value: tokenValue, decimals, label } = getBalance(exchangeAddress, token);
+    const { value: ethValue } = getBalance(exchangeAddress);
+    const { value: liquidityBalance } = getBalance(account, exchangeAddress);
+    const ownership = liquidityBalance.dividedBy(totalSupply);
+    const ethPer = ethValue.dividedBy(totalSupply);
+    const tokenPer = tokenValue.dividedBy(totalSupply);
+    const ownedEth = ethPer.multipliedBy(liquidityBalance).dividedBy(10 ** 18);
+    const ownedToken = tokenPer.multipliedBy(liquidityBalance).dividedBy(10 ** decimals);
 
     if (this.isNewExchange()) {
       const rate = BN(outputValue).dividedBy(inputValue);
@@ -308,6 +347,12 @@ class AddLiquidity extends Component {
           <div className="pool__exchange-rate-wrapper">
             <span className="swap__exchange-rate">Current Pool Size</span>
             <span>{` ${ethValue.dividedBy(10 ** 18).toFixed(2)} ${eth} + ${tokenValue.dividedBy(10 ** decimals).toFixed(2)} ${label}`}</span>
+          </div>
+          <div className="pool__exchange-rate-wrapper">
+            <span className="swap__exchange-rate">
+              Your Pool Share ({ownership.multipliedBy(100).toFixed(2)}%)
+            </span>
+            <span>{`${ownedEth.toFixed(2)} ETH + ${ownedToken.toFixed(2)} ${label}`}</span>
           </div>
         </div>
       )
@@ -326,6 +371,12 @@ class AddLiquidity extends Component {
         <div className="pool__exchange-rate-wrapper">
           <span className="swap__exchange-rate">Current Pool Size</span>
           <span>{` ${ethValue.dividedBy(10 ** 18).toFixed(2)} ${eth} + ${tokenValue.dividedBy(10 ** decimals).toFixed(2)} ${label}`}</span>
+        </div>
+        <div className="pool__exchange-rate-wrapper">
+            <span className="swap__exchange-rate">
+              Your Pool Share ({ownership.multipliedBy(100).toFixed(2)}%)
+            </span>
+          <span>{`${ownedEth.toFixed(2)} ETH + ${ownedToken.toFixed(2)} ${label}`}</span>
         </div>
       </div>
     )
@@ -416,6 +467,11 @@ class AddLiquidity extends Component {
     if (!showSummaryModal) {
       return null;
     }
+
+    ReactGA.event({
+      category: 'TransactionDetail',
+      action: 'Open',
+    });
 
     const { value, decimals, label } = selectors().getTokenBalance(outputCurrency, fromToken[outputCurrency]);
 
@@ -553,7 +609,7 @@ class AddLiquidity extends Component {
 
 export default connect(
   state => ({
-    isConnected: Boolean(state.web3connect.account),
+    isConnected: Boolean(state.web3connect.account) && state.web3connect.networkId == (process.env.REACT_APP_NETWORK_ID||1),
     account: state.web3connect.account,
     balances: state.web3connect.balances,
     web3: state.web3connect.web3,

@@ -3,9 +3,10 @@ import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import classnames from 'classnames';
 import {BigNumber as BN} from "bignumber.js";
+import MediaQuery from 'react-responsive';
+import ReactGA from 'react-ga';
 import { selectors } from '../../ducks/web3connect';
 import { CSSTransitionGroup } from "react-transition-group";
-import MediaQuery from 'react-responsive';
 import Header from '../../components/Header';
 import NavigationTabs from '../../components/NavigationTabs';
 import Modal from '../../components/Modal';
@@ -39,6 +40,10 @@ class Swap extends Component {
     lastEditedField: '',
     showSummaryModal: false,
   };
+
+  componentWillMount() {
+    ReactGA.pageview(window.location.pathname + window.location.search);
+  }
 
   shouldComponentUpdate(nextProps, nextState) {
     return true;
@@ -192,8 +197,8 @@ class Swap extends Component {
         outputReserve: outputReserveB,
       });
 
-      const exchangeRate = outputAmountB.dividedBy(inputAmountA);
       const outputValue = outputAmountB.dividedBy(BN(10 ** outputDecimalsB)).toFixed(7);
+      const exchangeRate = BN(outputValue).dividedBy(BN(oldInputValue));
 
       const appendState = {};
 
@@ -232,10 +237,10 @@ class Swap extends Component {
         outputReserve: outputReserveA,
       });
 
-      const exchangeRate = outputAmountB.dividedBy(inputAmountA);
       const inputValue = inputAmountA.isNegative()
         ? 'N/A'
         : inputAmountA.dividedBy(BN(10 ** inputDecimalsA)).toFixed(7);
+      const exchangeRate = BN(oldOutputValue).dividedBy(BN(inputValue));
 
       const appendState = {};
 
@@ -289,8 +294,8 @@ class Swap extends Component {
 
       const inputAmount = BN(oldInputValue).multipliedBy(10 ** inputDecimals);
       const outputAmount = calculateEtherTokenOutput({ inputAmount, inputReserve, outputReserve });
-      const exchangeRate = outputAmount.dividedBy(inputAmount);
       const outputValue = outputAmount.dividedBy(BN(10 ** outputDecimals)).toFixed(7);
+      const exchangeRate = BN(outputValue).dividedBy(BN(oldInputValue));
 
       const appendState = {};
 
@@ -313,10 +318,10 @@ class Swap extends Component {
 
       const outputAmount = BN(oldOutputValue).multipliedBy(10 ** outputDecimals);
       const inputAmount = calculateEtherTokenInput({ outputAmount, inputReserve, outputReserve });
-      const exchangeRate = outputAmount.dividedBy(inputAmount);
       const inputValue = inputAmount.isNegative()
         ? 'N/A'
         : inputAmount.dividedBy(BN(10 ** inputDecimals)).toFixed(7);
+      const exchangeRate = BN(oldOutputValue).dividedBy(BN(inputValue));
 
       const appendState = {};
 
@@ -373,6 +378,10 @@ class Swap extends Component {
 
     if (lastEditedField === INPUT) {
       // swap input
+      ReactGA.event({
+        category: type,
+        action: 'SwapInput',
+      });
       switch(type) {
         case 'ETH_TO_TOKEN':
           // let exchange = new web3.eth.Contract(EXCHANGE_ABI, fromToken[outputCurrency]);
@@ -420,6 +429,10 @@ class Swap extends Component {
 
     if (lastEditedField === OUTPUT) {
       // swap output
+      ReactGA.event({
+        category: type,
+        action: 'SwapOutput',
+      });
       switch (type) {
         case 'ETH_TO_TOKEN':
           new web3.eth.Contract(EXCHANGE_ABI, fromToken[outputCurrency])
@@ -540,6 +553,11 @@ class Swap extends Component {
     if (!this.state.showSummaryModal) {
       return null;
     }
+
+    ReactGA.event({
+      category: 'TransactionDetail',
+      action: 'Open',
+    });
 
     const ALLOWED_SLIPPAGE = 0.025;
     const TOKEN_ALLOWED_SLIPPAGE = 0.04;
@@ -751,7 +769,7 @@ class Swap extends Component {
 export default connect(
   state => ({
     balances: state.web3connect.balances,
-    isConnected: !!state.web3connect.account,
+    isConnected: !!state.web3connect.account && state.web3connect.networkId == (process.env.REACT_APP_NETWORK_ID||1),
     account: state.web3connect.account,
     web3: state.web3connect.web3,
     exchangeAddresses: state.addresses.exchangeAddresses,

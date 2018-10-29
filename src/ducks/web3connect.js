@@ -15,9 +15,11 @@ export const UPDATE_TOKEN_BALANCE = 'web3connect/updateTokenBalance';
 export const WATCH_APPROVALS = 'web3connect/watchApprovals';
 export const UPDATE_APPROVALS = 'web3connect/updateApprovals';
 export const ADD_CONTRACT = 'web3connect/addContract';
+export const UPDATE_NETWORK_ID = 'web3connect/updateNetworkId';
 
 const initialState = {
   web3: null,
+  networkId: 0,
   initialized: false,
   account: '',
   balances: {
@@ -44,7 +46,6 @@ const initialState = {
 const TOKEN_LABEL_FALLBACK = {
   '0x89d24A6b4CcB1B6fAA2625fE562bDD9a23260359': 'DAI',
   '0x9f8F72aA9304c8B593d555F12eF6589cC3A579A2': 'MKR',
-  '0x9B913956036a3462330B0642B20D3879ce68b450': 'BAT + ETH'
 };
 
 // selectors
@@ -99,7 +100,7 @@ export const selectors = () => (dispatch, getState) => {
   };
 };
 
-const Balance = (value, label = '', decimals = 18) => ({
+const Balance = (value, label = '', decimals = 0) => ({
   value: BN(value),
   label: label.toUpperCase(),
   decimals: +decimals,
@@ -212,6 +213,7 @@ export const sync = () => async (dispatch, getState) => {
     account,
     watched,
     contracts,
+    networkId,
   } = getState().web3connect;
 
   // Sync Account
@@ -219,6 +221,13 @@ export const sync = () => async (dispatch, getState) => {
   if (account !== accounts[0]) {
     dispatch({ type: UPDATE_ACCOUNT, payload: accounts[0] });
     dispatch(watchBalance({ balanceOf: accounts[0] }));
+  }
+
+  if (!networkId) {
+    dispatch({
+      type: UPDATE_NETWORK_ID,
+      payload: await web3.eth.net.getId(),
+    });
   }
 
   // Sync Ethereum Balances
@@ -433,6 +442,8 @@ export default function web3connectReducer(state = initialState, { type, payload
           },
         },
       };
+    case UPDATE_NETWORK_ID:
+      return { ...state, networkId: payload };
     default:
       return state;
   }

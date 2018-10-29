@@ -8,9 +8,10 @@ import ModeSelector from "./ModeSelector";
 import CurrencyInputPanel from "../../components/CurrencyInputPanel";
 import { selectors } from '../../ducks/web3connect';
 import OversizedPanel from "../../components/OversizedPanel";
-import ArrowPlus from "../../assets/images/plus-blue.svg";
+import ArrowPlus from "../../assets/images/arrow-down-blue.svg";
 import EXCHANGE_ABI from "../../abi/exchange";
 import promisify from "../../helpers/web3-promisfy";
+import ReactGA from "react-ga";
 
 class RemoveLiquidity extends Component {
   static propTypes = {
@@ -114,6 +115,10 @@ class RemoveLiquidity extends Component {
     ).send({ from: account }, (err, data) => {
       if (data) {
         this.reset();
+        ReactGA.event({
+          category: 'Pool',
+          action: 'RemoveLiquidity',
+        });
       }
     });
   };
@@ -153,7 +158,7 @@ class RemoveLiquidity extends Component {
 
 
     const exchangeAddress = fromToken[tokenAddress];
-    if (!exchangeAddress || !web3 || !input) {
+    if (!exchangeAddress || !web3) {
       return [
         <CurrencyInputPanel
           key="remove-liquidity-input"
@@ -183,30 +188,37 @@ class RemoveLiquidity extends Component {
         </OversizedPanel>
       ];
     }
-    const { value, decimals } = getBalance(account, exchangeAddress);
+    const { value: liquidityBalance } = getBalance(account, exchangeAddress);
     const { value: ethReserve } = getBalance(exchangeAddress);
-    const { value: tokenReserve, label } = getBalance(exchangeAddress, tokenAddress);
+    const { value: tokenReserve, decimals: tokenDecimals, label } = getBalance(exchangeAddress, tokenAddress);
 
-    const ownership = value.dividedBy(totalSupply);
+    const ownership = liquidityBalance.dividedBy(totalSupply);
     const ethPer = ethReserve.dividedBy(totalSupply);
     const tokenPer = tokenReserve.dividedBy(totalSupply);
+    const exchangeRate = tokenReserve.div(ethReserve);
+
+    const ownedEth = ethPer.multipliedBy(liquidityBalance).dividedBy(10 ** 18);
+    const ownedToken = tokenPer.multipliedBy(liquidityBalance).dividedBy(10 ** tokenDecimals);
 
     return [
       <CurrencyInputPanel
         title="Output"
         description="(estimated)"
         key="remove-liquidity-input"
-        renderInput={() => (
-          <div className="remove-liquidity__output">
-            <div className="remove-liquidity__output-text">
-              {`${ethPer.multipliedBy(input).toFixed(3)} ETH`}
+        renderInput={() => input
+          ? (
+            <div className="remove-liquidity__output">
+              <div className="remove-liquidity__output-text">
+                {`${ethPer.multipliedBy(input).toFixed(3)} ETH`}
+              </div>
+              <div className="remove-liquidity__output-plus"> + </div>
+              <div className="remove-liquidity__output-text">
+                {`${tokenPer.multipliedBy(input).toFixed(3)} ${label}`}
+              </div>
             </div>
-            <div className="remove-liquidity__output-plus"> + </div>
-            <div className="remove-liquidity__output-text">
-              {`${tokenPer.multipliedBy(input).toFixed(3)} ${label}`}
-            </div>
-          </div>
-        )}
+          )
+          : <div className="remove-liquidity__output" />
+        }
         disableTokenSelect
         disableUnlock
       />,
@@ -214,15 +226,19 @@ class RemoveLiquidity extends Component {
         <div className="pool__summary-panel">
           <div className="pool__exchange-rate-wrapper">
             <span className="pool__exchange-rate">Exchange Rate</span>
-            <span>{` ${ethReserve.dividedBy(10 ** 18).toFixed(2)} ETH + ${tokenReserve.dividedBy(10 ** decimals).toFixed(2)} ${label}`}</span>
+            <span>
+              {`1 ETH = ${exchangeRate.toFixed(4)} ${label}`}
+            </span>
           </div>
           <div className="pool__exchange-rate-wrapper">
             <span className="swap__exchange-rate">Current Pool Size</span>
-            <span>{totalSupply.dividedBy(10 ** decimals).toFixed(4)}</span>
+            <span>{`${ethReserve.dividedBy(10 ** 18).toFixed(2)} ETH + ${tokenReserve.dividedBy(10 ** tokenDecimals).toFixed(2)} ${label}`}</span>
           </div>
           <div className="pool__exchange-rate-wrapper">
-            <span className="swap__exchange-rate">Your Pool Share</span>
-            <span>{ownership.multipliedBy(100).toFixed(2)}%</span>
+            <span className="swap__exchange-rate">
+              Your Pool Share ({ownership.multipliedBy(100).toFixed(2)}%)
+            </span>
+            <span>{`${ownedEth.toFixed(2)} ETH + ${ownedToken.toFixed(2)} ${label}`}</span>
           </div>
         </div>
       </OversizedPanel>
@@ -282,7 +298,7 @@ class RemoveLiquidity extends Component {
 
 export default connect(
   state => ({
-    isConnected: Boolean(state.web3connect.account),
+    isConnected: Boolean(state.web3connect.account) && state.web3connect.networkId == (process.env.REACT_APP_NETWORK_ID||1),
     web3: state.web3connect.web3,
     balances: state.web3connect.balances,
     account: state.web3connect.account,

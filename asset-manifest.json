@@ -2,8 +2,8 @@
   "main.css": "./static/css/main.f5ab07b8.chunk.css",
   "main.js": "./static/js/main.afb1cea2.chunk.js",
   "main.js.map": "./static/js/main.afb1cea2.chunk.js.map",
-  "static/js/1.68fcaec5.chunk.js": "./static/js/1.68fcaec5.chunk.js",
-  "static/js/1.68fcaec5.chunk.js.map": "./static/js/1.68fcaec5.chunk.js.map",
+  "static/js/1.3e5ad521.chunk.js": "./static/js/1.3e5ad521.chunk.js",
+  "static/js/1.3e5ad521.chunk.js.map": "./static/js/1.3e5ad521.chunk.js.map",
   "runtime~main.js": "./static/js/runtime~main.4a686d48.js",
   "runtime~main.js.map": "./static/js/runtime~main.4a686d48.js.map",
   "static/media/currency-panel.scss": "./static/media/dropdown-blue.b20914ec.svg",
@@ -20,6 +20,6 @@
   "static/media/arrow-down-blue.svg": "./static/media/arrow-down-blue.cd061363.svg",
   "static/css/main.f5ab07b8.chunk.css.map": "./static/css/main.f5ab07b8.chunk.css.map",
   "index.html": "./index.html",
-  "precache-manifest.a199270f9faad14966ddefc49f9da98a.js": "./precache-manifest.a199270f9faad14966ddefc49f9da98a.js",
+  "precache-manifest.0c3ef04b6a753e98bfcfb5557c703040.js": "./precache-manifest.0c3ef04b6a753e98bfcfb5557c703040.js",
   "service-worker.js": "./service-worker.js"
 }

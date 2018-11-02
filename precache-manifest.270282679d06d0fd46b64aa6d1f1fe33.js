@@ -4,7 +4,7 @@ self.__precacheManifest = [
     "url": "./static/media/brave-logo.cb563c38.png"
   },
   {
-    "revision": "a4ae75e3f90c49d8195e",
+    "revision": "eefb2b15331712c05774",
     "url": "./static/css/main.ed151ce4.chunk.css"
   },
   {
@@ -32,8 +32,8 @@ self.__precacheManifest = [
     "url": "./static/media/trust-wallet-logo.0be980e8.svg"
   },
   {
-    "revision": "a4ae75e3f90c49d8195e",
-    "url": "./static/js/main.a4ae75e3.chunk.js"
+    "revision": "eefb2b15331712c05774",
+    "url": "./static/js/main.eefb2b15.chunk.js"
   },
   {
     "revision": "023762b6aec2a2249b8fdfb638f00ef3",
@@ -64,7 +64,7 @@ self.__precacheManifest = [
     "url": "./static/media/dropdown.7d32d2fa.svg"
   },
   {
-    "revision": "2d90639773242d0e37c99a05f768181f",
+    "revision": "b7634695ac068799ddc0fc9bfed593f2",
     "url": "./index.html"
   }
 ];

@@ -3,11 +3,11 @@ const TESTNET = {
         "addresses": [
             [
                 "ALICE",
-                "0x1BbE5edc5Caabf4517e40b766D64c3DEd86822Df"
+                "0xe7f965e27c18188caf27977a8e10b0bf40f6e523"
             ],
             [
                 "BOB",
-                "0x987652e1C2B3B953354A43171063499DCE16dC8f"
+                "0x61950e81019cadc560036125b262ef0caa705896"
             ]
         ]
     },
@@ -15,19 +15,19 @@ const TESTNET = {
         "addresses": [
             [
                 "ALICE",
-                "0xfeee61cf17129133e9dcd8eb681f7cde50ce830b"
+                "0x4adb64306dedc02e9b574df089636aeee184359e"
             ],
             [
                 "BOB",
-                "0xbee82878bc6f7c8576e335cde098cb503fe35fbf"
+                "0xc81d850429a4dc581ddd6198022103b5b2d719ee"
             ]
         ],
         "fromToken": {
-            "0x1BbE5edc5Caabf4517e40b766D64c3DEd86822Df": "0xfeee61cf17129133e9dcd8eb681f7cde50ce830b",
-            "0x987652e1C2B3B953354A43171063499DCE16dC8f": "0xbee82878bc6f7c8576e335cde098cb503fe35fbf"
+            "0xe7f965e27c18188caf27977a8e10b0bf40f6e523": "0x4adb64306dedc02e9b574df089636aeee184359e",
+            "0x61950e81019cadc560036125b262ef0caa705896": "0xc81d850429a4dc581ddd6198022103b5b2d719ee"
         }
     },
-    "factoryAddress": "0x984718904f853a004f145d133deab0c1de50466b"
+    "factoryAddress": "0xeb2ef6b55f603b858ca30ea9bdeaa0ef37c4625d"
 };
 
 const MAIN = {

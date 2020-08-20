@@ -2,32 +2,32 @@ const TESTNET = {
     "tokenAddresses": {
         "addresses": [
             [
-                "YUAN",
-                "0xc4c97929301eb30ff5c9c3150bbbe553768ffbbe"
+                "ALICE",
+                "0x1BbE5edc5Caabf4517e40b766D64c3DEd86822Df"
             ],
             [
-                "TIM",
-                "0x0aafb9299daafc32a051086e92847fab1ef85b50"
+                "BOB",
+                "0x987652e1C2B3B953354A43171063499DCE16dC8f"
             ]
         ]
     },
     "exchangeAddresses": {
         "addresses": [
             [
-                "YUAN",
-                "0xaf1a51fdca46190e7703b6cf97470efc92ec6498"
+                "ALICE",
+                "0xfeee61cf17129133e9dcd8eb681f7cde50ce830b"
             ],
             [
-                "TIM",
-                "0x33eda5a874732ee81a0364611d81fd34faf6eccf"
+                "BOB",
+                "0xbee82878bc6f7c8576e335cde098cb503fe35fbf"
             ]
         ],
         "fromToken": {
-            "0xc4c97929301eb30ff5c9c3150bbbe553768ffbbe": "0xaf1a51fdca46190e7703b6cf97470efc92ec6498",
-            "0x0aafb9299daafc32a051086e92847fab1ef85b50": "0x33eda5a874732ee81a0364611d81fd34faf6eccf"
+            "0x1BbE5edc5Caabf4517e40b766D64c3DEd86822Df": "0xfeee61cf17129133e9dcd8eb681f7cde50ce830b",
+            "0x987652e1C2B3B953354A43171063499DCE16dC8f": "0xbee82878bc6f7c8576e335cde098cb503fe35fbf"
         }
     },
-    "factoryAddress": "0x7753d7fb5d93ff9af0cffcd578f7c3bbc3d303ba"
+    "factoryAddress": "0x984718904f853a004f145d133deab0c1de50466b"
 };
 
 const MAIN = {
@@ -77,8 +77,8 @@ export const addExchange = ({label, exchangeAddress, tokenAddress}) => (dispatch
         payload: MAIN,
       };
     // CyberMiles Test Net
-    case 19:
-    case '19':
+    case 1:
+    case '1':
     default:
       return {
         type: SET_ADDRESSES,

@@ -39,7 +39,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "start:testnet": "REACT_APP_NETWORK_ID=19 REACT_APP_NETWORK='CyberMiles Test Network' react-scripts start",
+    "start:testnet": "REACT_APP_NETWORK_ID=42261 REACT_APP_NETWORK='Oasis Test Network' react-scripts start",
     "build": "react-scripts build && cp build/index.html build/404.html",
     "build:testnet": "REACT_APP_NETWORK_ID=19 REACT_APP_NETWORK='CyberMiles Test Network' react-scripts build && cp build/index.html build/404.html",
     "test": "react-scripts test --env=jsdom",

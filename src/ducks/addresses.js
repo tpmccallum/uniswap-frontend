@@ -68,6 +68,7 @@ export const addExchange = ({label, exchangeAddress, tokenAddress}) => (dispatch
 };
 
  export const setAddresses = networkId => {
+  console.log("networkId: " + networkId);
   switch(networkId) {
     // CyberMiles Main Net
     case 18:

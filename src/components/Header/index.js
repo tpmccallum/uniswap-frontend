@@ -85,8 +85,8 @@ class BlockingWarning extends Component {
     } = this.props;
     let content = [];
 
-    const correctNetworkId = process.env.REACT_APP_NETWORK_ID || 18;
-    const correctNetwork = process.env.REACT_APP_NETWORK || 'Main CyberMiles Network';
+    const correctNetworkId = process.env.REACT_APP_NETWORK_ID || 42261;
+    const correctNetwork = process.env.REACT_APP_NETWORK || 'Oasis Test Network';
 
     const wrongNetwork = networkId != correctNetworkId;
 

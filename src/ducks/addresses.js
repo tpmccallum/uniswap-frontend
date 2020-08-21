@@ -77,8 +77,8 @@ export const addExchange = ({label, exchangeAddress, tokenAddress}) => (dispatch
         payload: MAIN,
       };
     // CyberMiles Test Net
-    case 1:
-    case '1':
+    case 42261:
+    case '42261':
     default:
       return {
         type: SET_ADDRESSES,
